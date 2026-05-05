@@ -1,0 +1,36 @@
+# Бинарные файлы
+bin/
+*.exe
+main
+mom-boilerplate-v2
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Временные файлы
+*.tmp
+*.log
+
+# Зависимости (vendor если используется)
+# vendor/
+
+# Тестовые артефакты
+coverage.out
+coverage.html
+
+# Proto generated code
+api/gen/
+
+# Buf lock file
+buf.lock
+
+# macOS
+.DS_Store
+
+# ВАЖНО: В реальных проектах .env ДОЛЖЕН быть в .gitignore!
+# Здесь он НЕ игнорируется только в рамках учебного проекта,
+# чтобы студенты могли видеть пример конфигурации.
+# .env

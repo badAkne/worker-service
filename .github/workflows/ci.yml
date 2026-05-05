@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: go.sum
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build
+        run: |
+          mkdir -p ./bin
+          go build -o ./bin/ -v ./...
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    # Запускается параллельно с build и lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: go.sum
+
+      - name: Run tests
+        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.out
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: go.sum
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.7.2
+          args: --timeout=10m --config=./.golangci.yml
+
+  mod-check:
+    name: Go Mod Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: go.sum
+
+      - name: Check go.mod/go.sum
+        run: |
+          go mod tidy
+          git diff --exit-code go.mod go.sum || (echo "go.mod/go.sum не синхронизированы. Запустите 'go mod tidy'" && exit 1)
+
+  proto-lint:
+    name: Proto Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for proto files
+        id: check-proto
+        run: |
+          if [ -n "$(find api/proto -name '*.proto' 2>/dev/null)" ]; then
+            echo "has_proto=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_proto=false" >> $GITHUB_OUTPUT
+            echo "Нет proto файлов — пропускаем lint"
+          fi
+
+      - name: Setup buf
+        if: steps.check-proto.outputs.has_proto == 'true'
+        uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
+
+      - name: Lint proto files
+        if: steps.check-proto.outputs.has_proto == 'true'
+        run: buf lint
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [build, lint, test, mod-check, proto-lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t worker-service:${{ github.sha }} .

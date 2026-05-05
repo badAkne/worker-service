@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package example.v1;
+
+option go_package = "github.com/MoM-Repo/mom-boilerplate-v2/api/gen/example/v1;examplev1";
+
+// ExampleService — пример gRPC сервиса.
+service ExampleService {
+  // GetExample возвращает пример по ID.
+  rpc GetExample(GetExampleRequest) returns (GetExampleResponse);
+
+  // ListExamples возвращает список примеров.
+  rpc ListExamples(ListExamplesRequest) returns (ListExamplesResponse);
+}
+
+// GetExampleRequest — запрос на получение примера.
+message GetExampleRequest {
+  // ID примера.
+  string id = 1;
+}
+
+// GetExampleResponse — ответ с примером.
+message GetExampleResponse {
+  // Данные примера.
+  Example example = 1;
+}
+
+// ListExamplesRequest — запрос на список примеров.
+message ListExamplesRequest {
+  // Максимальное количество результатов.
+  int32 page_size = 1;
+
+  // Токен для пагинации.
+  string page_token = 2;
+}
+
+// ListExamplesResponse — ответ со списком примеров.
+message ListExamplesResponse {
+  // Список примеров.
+  repeated Example examples = 1;
+
+  // Токен следующей страницы.
+  string next_page_token = 2;
+}
+
+// Example — сущность примера.
+message Example {
+  // Уникальный идентификатор.
+  string id = 1;
+
+  // Название.
+  string name = 2;
+
+  // Описание.
+  string description = 3;
+}
