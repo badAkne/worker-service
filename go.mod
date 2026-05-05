@@ -1,6 +1,6 @@
 module github.com/badAkne/worker-service
 
-go 1.25.0
+go 1.25.1
 
 require (
 	github.com/IBM/sarama v1.48.0
