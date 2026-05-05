@@ -5,10 +5,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/badAkne/worker-service/internal/pkg/http/httph"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-
-	"github.com/badAkne/worker-service/internal/pkg/http/httph"
 )
 
 // ErrorGet — локальный алиас для удобства.

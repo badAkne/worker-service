@@ -4,10 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
-
 	"github.com/badAkne/worker-service/internal/pkg/http/httph"
 	"github.com/badAkne/worker-service/internal/pkg/http/respondent"
+	"github.com/go-playground/validator/v10"
 )
 
 // Ошибки binding.

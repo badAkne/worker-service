@@ -3,13 +3,12 @@ package config
 import (
 	"io"
 
+	"github.com/badAkne/worker-service/internal/app/config/section"
+	"github.com/badAkne/worker-service/internal/pkg/constant"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-
-	"github.com/badAkne/worker-service/internal/app/config/section"
-	"github.com/badAkne/worker-service/internal/pkg/constant"
 )
 
 type (
@@ -19,6 +18,7 @@ type (
 		Processor  section.Processor
 		Monitor    section.Monitor
 		Meta       Meta `ignore:"true"`
+		Broker     section.Broker
 	}
 
 	// Meta содержит метаданные о загрузке конфига.

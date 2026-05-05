@@ -4,10 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/badAkne/worker-service/internal/app/processor"
 	"github.com/badAkne/worker-service/internal/app/repository"
+	"github.com/rs/zerolog/log"
 )
 
 type procMigrate struct {

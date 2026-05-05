@@ -8,14 +8,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/badAkne/worker-service/internal/app/config/section"
+	"github.com/badAkne/worker-service/migration"
 	"github.com/rs/zerolog/log"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/migrate"
-
-	"github.com/badAkne/worker-service/internal/app/config/section"
-	"github.com/badAkne/worker-service/migration"
 )
 
 type (

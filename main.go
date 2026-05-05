@@ -4,38 +4,31 @@ import (
 	"os"
 	"strings"
 
-	"github.com/urfave/cli/v2"
-
 	"github.com/badAkne/worker-service/cmd"
-)
-
-const (
-	// AppName — имя приложения.
-	AppName = "worker-service"
-
-	// AppVersion — версия приложения.
-	AppVersion = "0.1.0"
+	"github.com/badAkne/worker-service/internal/pkg/constant"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
-	const Usage = "MoM Boilerplate V2 — шаблон Go сервиса"
+	const Usage = "Worker Service для обработки событий"
 
 	const Description = `
-Boilerplate для создания Go микросервисов.
-Включает: HTTP сервер (gorilla/mux), Bun ORM, zerolog, миграции.
+Worker Service обрабатывает события из Kafka:
+- ORDER_CREATED: расчёт стоимости доставки
 
-Примеры:
-  ./app web-server    # Запустить HTTP сервер
-  ./app migrate       # Применить миграции БД
+Доступные команды:
+  ./worker-service web-server              - HTTP сервер
+  ./worker-service subscribe-order-created - Consumer для ORDER_CREATED
 `
 
 	app := cli.App{
-		Name:    AppName,
-		Version: AppVersion,
+		Name:    constant.AppName,
+		Version: constant.GetFullVersion(),
 		Usage:   Usage,
 		Commands: []*cli.Command{
 			cmd.WebServer(),
-			cmd.Migrate(),
+			cmd.SubscribeOrderCreated(),
 		},
 		Description: strings.TrimSpace(Description),
 		Flags: []cli.Flag{
@@ -52,7 +45,6 @@ Boilerplate для создания Go микросервисов.
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		_, _ = os.Stderr.WriteString(err.Error() + "\n")
-		os.Exit(1)
+		log.Fatal().Err(err).Msg("Application failed")
 	}
 }
