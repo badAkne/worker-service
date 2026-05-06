@@ -3,9 +3,8 @@ package rprocessor
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
-
 	rhandler "github.com/badAkne/worker-service/internal/app/handler/http"
+	"github.com/gorilla/mux"
 )
 
 // registerV1Routes регистрирует API v1 routes.

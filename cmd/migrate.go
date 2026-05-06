@@ -3,9 +3,8 @@ package cmd
 import (
 	"strings"
 
-	"github.com/urfave/cli/v2"
-
 	"github.com/badAkne/worker-service/internal/app/builder"
+	"github.com/urfave/cli/v2"
 )
 
 const (

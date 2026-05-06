@@ -4,9 +4,8 @@ import (
 	"net/http"
 	"unsafe"
 
-	"github.com/gorilla/mux"
-
 	"github.com/badAkne/worker-service/internal/pkg/http/httph"
+	"github.com/gorilla/mux"
 )
 
 // reg — хелпер для регистрации route.

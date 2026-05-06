@@ -3,21 +3,21 @@ package cmd
 import (
 	"strings"
 
-	"github.com/urfave/cli/v2"
-
 	"github.com/badAkne/worker-service/internal/app/builder"
+	"github.com/urfave/cli/v2"
 )
 
 const (
-	cmdWebServerUsage = "Запускает HTTP веб-сервер"
+	cmdWebServerUsage = "Запуск HTTP сервера"
 
 	cmdWebServerDescription = `
-Инициализирует и запускает веб-сервер, который слушает указанный порт
-для входящих HTTP запросов.
+Запускает HTTP сервер для:
+- Health check (/health)
+- Метрики Prometheus (/metrics)
+- Будущих API эндпоинтов
 `
 )
 
-// WebServer возвращает CLI команду для запуска веб-сервера.
 func WebServer() *cli.Command {
 	return &cli.Command{
 		Name:            "web-server",
@@ -29,23 +29,12 @@ func WebServer() *cli.Command {
 	}
 }
 
-// cmdWebServer — handler команды web-server.
 func cmdWebServer(cCtx *cli.Context) error {
 	app := builder.NewBuilder(cCtx)
 	app.BuildConfig()
 
-	// Подключение к БД (опционально, раскомментируйте при необходимости)
-	// app.BuildRepoConnPostgres()
-
-	// TODO: Добавить репозитории и модули:
-	// app.BuildRepoXxx()      // Репозитории
-	// app.BuildModuleXxx()    // Модули бизнес-логики
-
-	// Handlers
-	app.BuildHandlerExample()
-
-	// HTTP процессор
-	app.BuildProcHttp()
+	// TODO: добавьте инициализацию компонентов для web-server
+	// app.BuildProcHttp()
 
 	app.Run()
 	return nil

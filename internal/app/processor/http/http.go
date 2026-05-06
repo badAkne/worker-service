@@ -8,15 +8,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/rs/zerolog/log"
-
 	"github.com/badAkne/worker-service/internal/app/config/section"
 	rhandler "github.com/badAkne/worker-service/internal/app/handler/http"
 	"github.com/badAkne/worker-service/internal/app/processor"
 	"github.com/badAkne/worker-service/internal/app/util"
 	"github.com/badAkne/worker-service/internal/pkg/http/httph"
 	"github.com/badAkne/worker-service/internal/pkg/http/mzerolog"
+	"github.com/gorilla/mux"
+	"github.com/rs/zerolog/log"
 )
 
 // httpProc — HTTP сервер, реализующий интерфейс processor.Processor.
