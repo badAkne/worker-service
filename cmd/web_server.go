@@ -33,6 +33,8 @@ func cmdWebServer(cCtx *cli.Context) error {
 	app := builder.NewBuilder(cCtx)
 	app.BuildConfig()
 
+	app.BuildConnRedis()
+
 	// TODO: добавьте инициализацию компонентов для web-server
 	// app.BuildProcHttp()
 

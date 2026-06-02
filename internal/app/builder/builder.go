@@ -20,6 +20,7 @@ import (
 	rprocessor "github.com/badAkne/worker-service/internal/app/processor/http"
 	pprocessor "github.com/badAkne/worker-service/internal/app/processor/other"
 	rcpostgres "github.com/badAkne/worker-service/internal/app/repository/conn/postgres"
+	rcredis "github.com/badAkne/worker-service/internal/app/repository/conn/redis"
 	"github.com/badAkne/worker-service/internal/pkg/http/httph"
 	"github.com/badAkne/worker-service/pkg/broker"
 	"github.com/badAkne/worker-service/pkg/broker/codec"
@@ -39,6 +40,7 @@ type Builder struct {
 
 	// Подключения
 	connPostgres *rcpostgres.Client
+	connRedis    *rcredis.Client
 
 	// Kafka
 	brokerKafka     broker.KafkaClient
@@ -139,6 +141,19 @@ func (b *Builder) BuildRepoConnMigrator() {
 	b.exec(b.connPostgres != nil, func(b *Builder) {
 		proc := pprocessor.NewMigrator(b.connPostgres)
 		b.processors = append(b.processors, proc)
+	})
+}
+
+func (b *Builder) BuildConnRedis() {
+	b.exec(true, func(b *Builder) {
+		cfg := config.Root.Repository.Redis
+		cl, err := rcredis.NewConn(b.ctx, cfg)
+		if err != nil {
+			b.err = fmt.Errorf("Repo.Conn.Redis: %w", err)
+			return
+		}
+
+		b.connRedis = cl
 	})
 }
 

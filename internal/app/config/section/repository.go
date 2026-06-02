@@ -6,6 +6,7 @@ type (
 	// Repository — конфигурация источников данных.
 	Repository struct {
 		Postgres RepositoryPostgres
+		Redis    RepositoryRedis
 	}
 
 	// RepositoryPostgres — конфигурация подключения к PostgreSQL.
@@ -17,5 +18,11 @@ type (
 		MigrationTable string        `split_words:"true" default:"schema_migrations"`
 		ReadTimeout    time.Duration `split_words:"true" default:"30s"`
 		WriteTimeout   time.Duration `split_words:"true" default:"30s"`
+	}
+
+	RepositoryRedis struct {
+		Address  string `required:"true" default:"localhost:6379"`
+		Password string `default:""`
+		DB       int    `default:"0"`
 	}
 )
