@@ -9,6 +9,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/badAkne/worker-service/internal/app/client/fixer"
 	"github.com/badAkne/worker-service/internal/app/config"
 	"github.com/badAkne/worker-service/internal/app/entity"
 	ehandler "github.com/badAkne/worker-service/internal/app/handler/event"
@@ -19,8 +20,11 @@ import (
 	eprocessor "github.com/badAkne/worker-service/internal/app/processor/event"
 	rprocessor "github.com/badAkne/worker-service/internal/app/processor/http"
 	pprocessor "github.com/badAkne/worker-service/internal/app/processor/other"
+	"github.com/badAkne/worker-service/internal/app/repository"
 	rcpostgres "github.com/badAkne/worker-service/internal/app/repository/conn/postgres"
 	rcredis "github.com/badAkne/worker-service/internal/app/repository/conn/redis"
+	rcurrency "github.com/badAkne/worker-service/internal/app/repository/currency"
+	scurrency "github.com/badAkne/worker-service/internal/app/service/currency"
 	"github.com/badAkne/worker-service/internal/pkg/http/httph"
 	"github.com/badAkne/worker-service/pkg/broker"
 	"github.com/badAkne/worker-service/pkg/broker/codec"
@@ -56,9 +60,13 @@ type Builder struct {
 	hExample          rhandler.Example
 	handlerEventOrder ehandler.Order
 
-	// TODO: Добавить при необходимости:
-	// - repositories
-	// - modules
+	// repositories
+	repoCurrencyRate repository.CurrencyRate
+	//  services
+	modCurrency *scurrency.Service
+	//  clients
+	fixerClient *fixer.Client
+
 	// - handlers
 	// - brokers (Kafka)
 	// - monitors (OpenTelemetry, Prometheus)
@@ -238,6 +246,44 @@ func (b *Builder) buildProcEventSubscribeOrderCreated() {
 	proc := eprocessor.NewOrderCreatedEventsCatcher(b.handlerEventOrder, b.busOrderCreated)
 	b.processors = append(b.processors, proc)
 	log.Info().Msg("Processor ORDER_CREATED registered")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///// REPOSITORIES ///////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+func (b *Builder) BuildRepoCurrencyRate() {
+	b.exec(true, (*Builder).buildRepoCurrencyRate, b.connRedis)
+}
+
+func (b *Builder) buildRepoCurrencyRate() {
+	cfg := config.Root.Client.Fixer
+	b.repoCurrencyRate = rcurrency.NewRedisRepository(b.connRedis.Cl, cfg.CacheTTL)
+	fmt.Println("Currency rate repository created")
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+// /// SERVICES ///////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
+func (b *Builder) BuildModuleCurrency() {
+	b.exec(true, (*Builder).buildModuleCurrency, b.fixerClient, b.repoCurrencyRate)
+}
+
+func (b *Builder) buildModuleCurrency() {
+	b.modCurrency = scurrency.NewService(b.fixerClient, b.repoCurrencyRate)
+	fmt.Println("Currency service created")
+}
+
+// //////////////////////////////////////////////////////////////////////////////
+// /// SERVICES ///////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
+func (b *Builder) BuildClientFixer() {
+	b.exec(true, (*Builder).buildClientFixer)
+}
+
+func (b *Builder) buildClientFixer() {
+	cfg := config.Root.Client.Fixer
+	b.fixerClient = fixer.NewClient(cfg)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

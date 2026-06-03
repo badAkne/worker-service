@@ -19,6 +19,7 @@ type (
 		Monitor    section.Monitor
 		Meta       Meta `ignore:"true"`
 		Broker     section.Broker
+		Client     section.Client
 	}
 
 	// Meta содержит метаданные о загрузке конфига.

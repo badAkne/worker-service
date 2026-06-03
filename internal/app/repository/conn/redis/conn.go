@@ -11,8 +11,8 @@ import (
 )
 
 type Client struct {
-	cl  *redis.Client
-	cfg section.RepositoryRedis
+	Cl  *redis.Client
+	Cfg section.RepositoryRedis
 }
 
 func NewConn(ctx context.Context, cfg section.RepositoryRedis) (*Client, error) {
@@ -37,7 +37,7 @@ func NewConn(ctx context.Context, cfg section.RepositoryRedis) (*Client, error) 
 
 	log.Info().Msg("Connected to Redis")
 	return &Client{
-		cl:  cl,
-		cfg: cfg,
+		Cl:  cl,
+		Cfg: cfg,
 	}, nil
 }
