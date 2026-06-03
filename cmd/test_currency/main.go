@@ -51,7 +51,8 @@ func main() {
 	start = time.Now()
 	rate, err = currencyService.GetRate(ctx, "EUR", "USD")
 	if err != nil {
-		log.Fatalf("Ошибка: %v", err)
+		fmt.Printf("Ошибка: %v", err)
+		panic("m")
 	}
 	log.Printf("EUR -> USD: %.6f (took %v)\n", rate, time.Since(start))
 
