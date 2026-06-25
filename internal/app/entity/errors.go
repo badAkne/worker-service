@@ -19,4 +19,10 @@ var (
 
 	// ErrUnauthorized — требуется авторизация.
 	ErrUnauthorized = errors.New("entity: unauthorized")
+
+	ErrFixerInvalidApiKey     = errors.New("fixer: invalid api key")
+	ErrFixerRateLimitExceeded = errors.New("fixer: rate limit exceeded")
+	ErrFixerUnavailable       = errors.New("fixer: service unavailable")
+	ErrFixerInvalidResponse   = errors.New("fixer: invalid response")
+	ErrFixerCurrencyNotFound  = errors.New("fixer: currency not found")
 )
