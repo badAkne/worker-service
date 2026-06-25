@@ -3,7 +3,8 @@ package entity
 const (
 	EventOrderHeaderTypeKey = "type"
 
-	EventOrderHeaderCreated = "order.created"
+	EventOrderHeaderCreated            = "order.created"
+	EventOrderHeaderDeliveryCalculated = "order.delivery.calculated"
 )
 
 type EventOrderCreated struct {
@@ -19,4 +20,11 @@ type EventOrderItem struct {
 	ProductID string  `json:"product_id"`
 	Quantity  int     `json:"quantity"`
 	Price     float64 `json:"price"`
+}
+
+type EventOrderDeliveryCalculated struct {
+	OrderID       string  `json:"order_id"`
+	DeliveryPrice float64 `json:"delivery_price"`
+	Currency      string  `json:"currency"`
+	CalculatedAt  string  `json:"calculated_at"`
 }

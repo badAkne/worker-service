@@ -17,7 +17,8 @@ type (
 
 	// BrokerKafkaModelOrder - конфиг для событий заказа.
 	BrokerKafkaModelOrder struct {
-		Created BrokerKafkaModelOrderCreated `split_words:"true"`
+		Created            BrokerKafkaModelOrderCreated            `split_words:"true"`
+		DeliveryCalculated BrokerKafkaModelOrderDeliveryCalculated `split_words:"true"`
 	}
 
 	// BrokerKafkaModelOrderCreated - конфиг для топика order.created.
@@ -25,5 +26,9 @@ type (
 	BrokerKafkaModelOrderCreated struct {
 		Topic         string `required:"true" default:"order.created"`
 		ConsumerGroup string `split_words:"true"`
+	}
+
+	BrokerKafkaModelOrderDeliveryCalculated struct {
+		Topic string `required:"true" default:"order.delivery.calculated"`
 	}
 )

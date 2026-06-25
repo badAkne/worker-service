@@ -24,7 +24,9 @@ import (
 	rcpostgres "github.com/badAkne/worker-service/internal/app/repository/conn/postgres"
 	rcredis "github.com/badAkne/worker-service/internal/app/repository/conn/redis"
 	rcurrency "github.com/badAkne/worker-service/internal/app/repository/currency"
+	"github.com/badAkne/worker-service/internal/app/service"
 	scurrency "github.com/badAkne/worker-service/internal/app/service/currency"
+	sdelivery "github.com/badAkne/worker-service/internal/app/service/delivery"
 	"github.com/badAkne/worker-service/internal/pkg/http/httph"
 	"github.com/badAkne/worker-service/pkg/broker"
 	"github.com/badAkne/worker-service/pkg/broker/codec"
@@ -47,8 +49,9 @@ type Builder struct {
 	connRedis    *rcredis.Client
 
 	// Kafka
-	brokerKafka     broker.KafkaClient
-	busOrderCreated broker.Bus[entity.EventOrderCreated]
+	brokerKafka                broker.KafkaClient
+	busOrderCreated            broker.Bus[entity.EventOrderCreated]
+	busOrderDeliveryCalculated broker.Bus[entity.EventOrderDeliveryCalculated]
 
 	// Процессоры
 	processors []processor.Processor
@@ -63,7 +66,8 @@ type Builder struct {
 	// repositories
 	repoCurrencyRate repository.CurrencyRate
 	//  services
-	modCurrency *scurrency.Service
+	srvCurrency service.Currency
+	srvDelivery service.Delivery
 	//  clients
 	fixerClient *fixer.Client
 
@@ -193,15 +197,24 @@ func (b *Builder) buildBrokerKafka() {
 
 	b.brokerKafka = *kafkaClient
 	type T1 = entity.EventOrderCreated
+	type T2 = entity.EventOrderDeliveryCalculated
 
-	codec := codec.NewCodecJson[T1]()
+	codecOrderCreated := codec.NewCodecJson[T1]()
+	codecOrderDeliveryCalculated := codec.NewCodecJson[T2]()
 
-	bus := broker.MustKafkaBus(&b.brokerKafka,
-		codec,
+	b.busOrderCreated = broker.MustKafkaBus(&b.brokerKafka,
+		codecOrderCreated,
 		config.Root.Broker.Kafka.ModelOrder.Created.Topic,
 		butil.Coalesce(config.Root.Broker.Kafka.ModelOrder.Created.ConsumerGroup,
 			kafkaCfg.ConsumerGroup))
-	b.busOrderCreated = bus
+
+	b.busOrderDeliveryCalculated = broker.MustKafkaBus(
+		&b.brokerKafka, codecOrderDeliveryCalculated,
+		config.Root.Broker.Kafka.ModelOrder.DeliveryCalculated.Topic,
+		"",
+	)
+
+	log.Debug().Msg("Kafka buses created")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -218,8 +231,8 @@ func (b *Builder) BuildHandlerExample() {
 
 func (b *Builder) BuildHandlerEventOrder() {
 	b.exec(true, func(b *Builder) {
-		b.handlerEventOrder = eorder.NewHandler()
-	})
+		b.handlerEventOrder = eorder.NewHandler(b.srvDelivery, b.busOrderDeliveryCalculated)
+	}, b.srvDelivery, b.busOrderDeliveryCalculated)
 }
 
 // TODO: Добавить методы для других handlers:
@@ -265,13 +278,19 @@ func (b *Builder) buildRepoCurrencyRate() {
 // //////////////////////////////////////////////////////////////////////////////
 // /// SERVICES ///////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////////////
-func (b *Builder) BuildModuleCurrency() {
+func (b *Builder) BuildServiceCurrency() {
 	b.exec(true, (*Builder).buildModuleCurrency, b.fixerClient, b.repoCurrencyRate)
 }
 
 func (b *Builder) buildModuleCurrency() {
-	b.modCurrency = scurrency.NewService(b.fixerClient, b.repoCurrencyRate)
+	b.srvCurrency = scurrency.NewService(b.fixerClient, b.repoCurrencyRate)
 	fmt.Println("Currency service created")
+}
+
+func (b *Builder) BuildServiceDelivery() {
+	b.exec(true, func(b *Builder) {
+		b.srvDelivery = sdelivery.NewService(b.srvCurrency)
+	}, b.srvCurrency)
 }
 
 // //////////////////////////////////////////////////////////////////////////////
