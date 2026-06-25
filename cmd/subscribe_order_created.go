@@ -37,8 +37,22 @@ func cmdSubscribeOrderCreated(cCtx *cli.Context) error {
 	app := builder.NewBuilder(cCtx)
 	app.BuildConfig()
 
+	// Connections
+	app.BuildConnRedis()
 	app.BuildBrokerKafka()
+
+	// Clients & Repositories
+	app.BuildClientFixer()
+	app.BuildRepoCurrencyRate()
+
+	// Services
+	app.BuildServiceCurrency()
+	app.BuildServiceDelivery()
+
+	// Handlers
 	app.BuildHandlerEventOrder()
+
+	// Processors
 	app.BuildProcEventSubscribeOrderCreated()
 
 	app.Run()
